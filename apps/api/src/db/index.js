@@ -4,32 +4,24 @@ import postgres from 'postgres';
 import * as schema from './schema.js';
 import logger from '../utils/logger.js';
 
-/**
- * Initialize PostgreSQL client
- * Uses DATABASE_URL environment variable or falls back to default local PostgreSQL connection
- * Format: postgresql://user:password@host:port/database
- */
-const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/whatsapp_db';
+const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error('DATABASE_URL environment variable is not set');
+  logger.error('❌ DATABASE_URL não definida. Configure o arquivo .env na pasta apps/api/');
+  process.exit(1);
 }
 
-logger.info('Initializing PostgreSQL connection...');
+logger.info('Conectando ao banco de dados PostgreSQL...');
 
-/**
- * Create postgres client
- * This client handles the actual database connection pooling and queries
- */
-const client = postgres(databaseUrl);
+const client = postgres(databaseUrl, {
+  max: 10,               // pool de até 10 conexões
+  idle_timeout: 30,      // fecha conexões ociosas após 30s
+  connect_timeout: 15,   // timeout de conexão: 15s
+  onnotice: () => {},    // silencia avisos do postgres
+});
 
-/**
- * Initialize Drizzle ORM instance
- * Provides type-safe query builder and schema management
- * schema object includes all table definitions from schema.js
- */
 export const db = drizzle(client, { schema });
 
-logger.info('Drizzle ORM database instance initialized successfully');
+logger.info('✅ Drizzle ORM inicializado com sucesso.');
 
 export default db;

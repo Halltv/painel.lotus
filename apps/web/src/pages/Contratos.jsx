@@ -1,63 +1,80 @@
-import React, { useRef, useState } from 'react';
-import { RefreshCw, ExternalLink, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useEffect, useRef } from 'react';
 
-// O index.html dos contratos fica em apps/web/public/Contratos/
-// ATENÇÃO: o nome da pasta é "Contratos" com C maiúsculo (Linux é case-sensitive)
-const CONTRATOS_PATH = '/Contratos/index.html';
-
+/**
+ * Contratos — carrega o sistema de contratos (vanilla JS) diretamente
+ * no DOM sem iframe, evitando o loop de SPA.
+ *
+ * Estratégia: busca o HTML via fetch (arquivo estático em /Contratos/index.html),
+ * injeta o <style> e o <body> num container isolado, e executa os scripts inline.
+ */
 export default function Contratos() {
-  const iframeRef = useRef(null);
-  const [loading, setLoading] = useState(true);
+  const containerRef = useRef(null);
+  const initialized = useRef(false);
 
-  const handleLoad = () => setLoading(false);
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
 
-  const handleReload = () => {
-    setLoading(true);
-    if (iframeRef.current) {
-      iframeRef.current.src = CONTRATOS_PATH;
-    }
-  };
+    const container = containerRef.current;
+    if (!container) return;
+
+    fetch('/Contratos/index.html')
+      .then(r => r.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // 1. Injetar estilos do contrato (isolados no container)
+        const style = document.createElement('style');
+        style.textContent = Array.from(doc.querySelectorAll('style'))
+          .map(s => s.textContent)
+          .join('\n');
+        container.appendChild(style);
+
+        // 2. Injetar o corpo HTML
+        container.innerHTML += doc.body.innerHTML;
+
+        // 3. Carregar scripts CDN externos primeiro, depois executar inline
+        const cdnScripts = Array.from(doc.querySelectorAll('script[src]'));
+        const inlineScript = Array.from(doc.querySelectorAll('script:not([src])')).pop();
+
+        function loadScript(src) {
+          return new Promise((resolve, reject) => {
+            // reutiliza se já estiver na página
+            if (document.querySelector(`script[src="${src}"]`)) return resolve();
+            const s = document.createElement('script');
+            s.src = src;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+          });
+        }
+
+        Promise.all(cdnScripts.map(s => loadScript(s.getAttribute('src'))))
+          .then(() => {
+            if (inlineScript?.textContent) {
+              const s = document.createElement('script');
+              s.textContent = inlineScript.textContent;
+              container.appendChild(s);
+            }
+          })
+          .catch(console.error);
+      })
+      .catch(err => {
+        container.innerHTML = `
+          <div style="padding:2rem;text-align:center;color:#ef4444">
+            <p style="font-size:1.1rem;font-weight:600">Erro ao carregar o módulo de Contratos</p>
+            <p style="font-size:.85rem;margin-top:.5rem;opacity:.7">${err.message}</p>
+          </div>`;
+      });
+  }, []);
 
   return (
-    <div className="flex flex-col -m-6" style={{ height: 'calc(100vh - 64px)' }}>
-
-      {/* Barra superior */}
-      <div className="flex items-center justify-between px-4 py-2 bg-card border-b shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-foreground">🌸 Lotus TEF — Contratos</span>
-          {loading && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
-        </div>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={handleReload} className="h-7 px-2 text-xs gap-1">
-            <RefreshCw className="w-3.5 h-3.5" />
-            Recarregar
-          </Button>
-          <Button variant="ghost" size="sm" asChild className="h-7 px-2 text-xs gap-1">
-            <a href={CONTRATOS_PATH} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="w-3.5 h-3.5" />
-              Nova aba
-            </a>
-          </Button>
-        </div>
-      </div>
-
-      {/* Iframe */}
-      <div className="flex-1 relative">
-        {loading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/40 z-10 gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Carregando Contratos...</p>
-          </div>
-        )}
-        <iframe
-          ref={iframeRef}
-          src={CONTRATOS_PATH}
-          title="Lotus TEF Contratos"
-          className="w-full h-full border-0"
-          onLoad={handleLoad}
-        />
-      </div>
-    </div>
+    // Ocupa todo o espaço disponível, sem padding extra do layout
+    <div
+      ref={containerRef}
+      className="-m-4"
+      style={{ minHeight: 'calc(100vh - 56px)', position: 'relative' }}
+    />
   );
 }

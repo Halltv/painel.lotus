@@ -24,6 +24,7 @@ const pageNames = {
   '/whatsapp': 'Lotus Zap Zap',
   '/hub': 'Lotus Wiki',
   '/app': 'Lotus APP',
+  '/contratos': 'Contratos',
   '/settings': 'Configurações',
 };
 
@@ -40,7 +41,7 @@ export default function Header() {
   const isAdmin = user?.role === 'ADMIN';
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-card px-6">
+    <header className="flex h-14 items-center justify-between border-b bg-card px-4">
       <div className="flex items-center flex-1 gap-4">
         <h2 className="text-lg font-semibold text-foreground hidden sm:block">{currentPageName}</h2>
         <div className="relative w-full max-w-md hidden md:block">

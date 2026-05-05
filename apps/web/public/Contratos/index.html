@@ -25,20 +25,23 @@
       --radius: 8px;
       --radius-lg: 12px;
     }
-    html, body { height: 100%; margin: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
-    .app { display: flex; min-height: 100%; flex-direction: column; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+    .app { display: flex; height: 100vh; }
 
-
-    /* Internal tab nav (replaces sidebar) */
-    .tab-nav { display: flex; align-items: center; gap: 2px; padding: 8px 16px; background: var(--sidebar); border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
-    .tab-nav-item { display: flex; align-items: center; gap: 7px; padding: 7px 14px; font-size: 12.5px; color: rgba(255,255,255,0.55); cursor: pointer; border-radius: 6px; border: none; background: transparent; transition: all .15s; white-space: nowrap; }
-    .tab-nav-item:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.08); }
-    .tab-nav-item.active { color: #fff; background: rgba(255,255,255,0.15); }
-    .tab-badge { background: var(--purple-lt); color: #1e0a4a; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px; min-width: 18px; text-align: center; }
+    /* Sidebar */
+    .sidebar { width: 212px; background: var(--sidebar); display: flex; flex-direction: column; flex-shrink: 0; }
+    .logo-area { padding: 18px 16px 14px; border-bottom: 0.5px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; }
+    .logo-area img { width: 40px; height: 29px; object-fit: contain; }
+    .logo-text { font-size: 13px; font-weight: 700; color: #fff; }
+    .logo-sub  { font-size: 10px; color: rgba(255,255,255,0.38); margin-top: 1px; }
+    .nav { padding: 10px 0; flex: 1; }
+    .nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 16px; font-size: 12.5px; color: rgba(255,255,255,0.48); cursor: pointer; border-left: 2px solid transparent; transition: all .15s; user-select: none; }
+    .nav-item:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
+    .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-lt); }
+    .nav-badge { margin-left: auto; background: var(--purple-lt); color: #1e0a4a; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px; min-width: 18px; text-align: center; }
 
     /* Main */
-    .main { flex: 1; display: flex; flex-direction: column; overflow: auto; width: 100%; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 22px; height: 52px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
     .topbar-title { font-size: 14px; font-weight: 700; }
     .topbar-actions { display: flex; gap: 8px; }
@@ -64,7 +67,7 @@
     .pill-live { background: #EDE9FE; color: #5B21B6; }
     .pill-gray { background: var(--bg); color: var(--muted); border: 0.5px solid var(--border); }
     .panel-body { padding: 18px; }
-    .scroll-body { padding: 18px; max-height: calc(100% - 160px); overflow-y: auto; }
+    .scroll-body { padding: 18px; max-height: calc(100vh - 160px); overflow-y: auto; }
 
     /* Form */
     .fgroup { margin-bottom: 12px; }
@@ -139,29 +142,39 @@
 <body>
 <div class="app">
 
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo-area">
+      <img src="/logo.jpg" alt="Lotus TEF">
+      <div>
+        <div class="logo-text">Lotus TEF</div>
+        <div class="logo-sub">Gestão de Contratos</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="showView('novo')" id="nav-novo">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Novo contrato
+      </div>
+      <div class="nav-item" onclick="showView('enviados')" id="nav-enviados">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Enviados
+        <span class="nav-badge" id="badge-enviados">0</span>
+      </div>
+      <div class="nav-item" onclick="showView('todos')" id="nav-todos">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Todos os contratos
+        <span class="nav-badge" id="badge-todos">0</span>
+      </div>
+      <div class="nav-item" onclick="showView('smtp')" id="nav-smtp">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        Config. email
+      </div>
+    </nav>
+  </div>
+
   <!-- MAIN -->
   <div class="main">
-    <!-- Tab navigation (substitui a sidebar removida) -->
-    <div class="tab-nav">
-      <button class="tab-nav-item active" id="nav-novo" onclick="showView('novo')">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Novo contrato
-      </button>
-      <button class="tab-nav-item" id="nav-enviados" onclick="showView('enviados')">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-        Enviados
-        <span class="tab-badge" id="badge-enviados">0</span>
-      </button>
-      <button class="tab-nav-item" id="nav-todos" onclick="showView('todos')">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        Todos os contratos
-        <span class="tab-badge" id="badge-todos">0</span>
-      </button>
-      <button class="tab-nav-item" id="nav-smtp" onclick="showView('smtp')">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
-        Config. email
-      </button>
-    </div>
     <div class="topbar">
       <span class="topbar-title" id="view-title">Novo contrato</span>
       <div class="topbar-actions" id="top-actions">
@@ -420,7 +433,7 @@ function buildContractHTML(d, forPdf=false) {
   const endereco = partes || hl('[ENDEREÇO]');
   
   // Usa o base64 para garantir que a imagem vá para o PDF e Word
-  const logoSrc = window.logoBase64 || 'logo.jpg';
+  const logoSrc = window.logoBase64 || '/logo.jpg';
   
   return `
     <div style="text-align: right; margin-bottom: 15px;"><img src="${logoSrc}" alt="Lotus TEF" style="height: 52px;"></div>
@@ -608,7 +621,7 @@ async function generatePdfBlob(d) {
 
   // Embed logo
   try {
-    const logoSrc = window.logoBase64 || 'logo.jpg';
+    const logoSrc = window.logoBase64 || '/logo.jpg';
     pdf.addImage(logoSrc, 'JPEG', PW - MR - 40, MT, 40, 18, '', 'FAST');
   } catch(e) { console.warn('Logo PDF error:', e); }
 
@@ -1257,9 +1270,9 @@ function showView(v) {
     const n=$('nav-'+x);   if(n)  n.classList.remove('active');
   });
   const t=$('view-'+v); if(t) t.style.display = v==='novo'?'grid':'block';
-  const navEl=$('nav-'+v); if(navEl) navEl.classList.add('active');
-  const vt=$('view-title'); if(vt) vt.textContent = {novo:'Novo contrato',enviados:'Contratos enviados',todos:'Todos os contratos',smtp:'Configuração de email'}[v];
-  const ta=$('top-actions'); if(ta) ta.style.display = v==='novo'?'flex':'none';
+  $('nav-'+v).classList.add('active');
+  $('view-title').textContent = {novo:'Novo contrato',enviados:'Contratos enviados',todos:'Todos os contratos',smtp:'Configuração de email'}[v];
+  $('top-actions').style.display = v==='novo'?'flex':'none';
   if(v==='enviados') renderList('enviados');
   if(v==='todos')    renderList('todos');
 }
@@ -1272,25 +1285,34 @@ async function doGenerate() {
   // Modo edição: atualiza contrato existente
   if (window._editingId) {
     loader(true, 'Salvando edição...');
-    const idx = contratos.findIndex(x => x.id === window._editingId);
-    if(idx >= 0){ contratos[idx] = {...contratos[idx], ...body}; DB.saveContratos(contratos); }
+    const r = await fetch('/api/contratos/'+window._editingId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d = await r.json();
     loader(false);
-    updateBadges();
-    toast('✓ Contrato atualizado!');
-    clearForm();
-    $('btn-gerar').textContent = 'Gerar contrato';
+    if(d.ok){
+      const idx = contratos.findIndex(x => x.id === window._editingId);
+      if(idx >= 0) contratos[idx] = {...contratos[idx], ...body};
+      updateBadges();
+      toast('✓ Contrato atualizado!');
+      clearForm();
+      // Atualiza botão de volta para "Gerar contrato"
+      $('btn-gerar').textContent = 'Gerar contrato';
+    } else { toast('Erro ao salvar: '+d.msg, true); }
     return;
   }
 
   // Novo contrato
   loader(true, 'Salvando contrato...');
-  const novoContrato = {...body, id: DB.newId(), dataGeracao: new Date().toLocaleDateString('pt-BR'), status:'Gerado', enviado:false};
-  contratos.unshift(novoContrato);
-  DB.saveContratos(contratos);
+  const r = await fetch('/api/contratos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d = await r.json();
   loader(false);
-  updateBadges();
-  toast('✓ Contrato gerado e salvo!');
-  clearForm();
+  if(d.ok){
+    contratos.unshift(d.contrato);
+    updateBadges();
+    toast('✓ Contrato gerado e salvo!');
+    clearForm();
+  } else {
+    toast('Erro: '+d.msg, true);
+  }
 }
 
 // ── Enviar email com PDF ──────────────────────────────────────────────────────
@@ -1304,10 +1326,9 @@ async function doSendEmail() {
 
   let c = contratos.find(x => x.razao === formData.razao && x.cnpj === formData.cnpj);
   if (!c) {
-    c = {...formData, id: DB.newId(), dataGeracao: new Date().toLocaleDateString('pt-BR'), status:'Gerado', enviado:false};
-    contratos.unshift(c);
-    DB.saveContratos(contratos);
-    updateBadges();
+    const r = await fetch('/api/contratos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(formData)});
+    const rd = await r.json();
+    if (rd.ok) { contratos.unshift(rd.contrato); c = rd.contrato; updateBadges(); }
   }
   if (!c) { loader(false); toast('Erro ao salvar contrato.', true); return; }
 
@@ -1334,12 +1355,17 @@ async function doSendEmail() {
       pdfBase64: base64pdf,
       pdfNome: `Contrato_LotasTEF_${formData.razao.replace(/[^a-zA-Z0-9]/g,'_')}.pdf`
     };
-    // Envio de email requer backend SMTP configurado
+    const res = await fetch('/api/enviar-email', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const rd = await res.json();
     loader(false);
-    // Atualiza status local mesmo sem backend
-    if(c){ c.status='Enviado'; c.enviado=true; c.emailDest=formData.email; c.dataEnvio=new Date().toLocaleDateString('pt-BR'); DB.saveContratos(contratos); updateBadges(); }
-    toast('⚠ Email não enviado (sem backend). Contrato salvo como Enviado localmente.');
-    clearForm();
+    if(rd.ok){
+      c.status='Enviado'; c.enviado=true; c.emailDest=formData.email; c.dataEnvio=new Date().toLocaleDateString('pt-BR');
+      updateBadges();
+      toast('✉ PDF enviado para '+formData.email);
+      clearForm();
+    } else {
+      toast(rd.msg||'Erro ao enviar email.', true);
+    }
   };
 }
 
@@ -1366,17 +1392,21 @@ async function downloadPdf(contratoId) {
 // ── Salvar SMTP ───────────────────────────────────────────────────────────────
 async function saveSmtp() {
   loader(true, 'Salvando...');
-  DB.saveSmtp({host:val('smtp-host'),port:val('smtp-port'),user:val('smtp-user'),pass:$('smtp-pass').value,nome:val('smtp-nome')});
+  const r = await fetch('/api/smtp',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({host:val('smtp-host'),port:val('smtp-port'),user:val('smtp-user'),pass:$('smtp-pass').value,nome:val('smtp-nome')})});
   loader(false);
-  toast('✓ Configurações salvas localmente!');
+  if((await r.json()).ok) toast('✓ Configurações salvas!');
 }
 
 // ── Marcar assinado ───────────────────────────────────────────────────────────
 async function markSigned(id) {
-  const c=contratos.find(x=>x.id===id); if(c){ c.status='Assinado'; DB.saveContratos(contratos); }
-  const active=document.querySelector('.nav-item.active');
-  if(active){ const v=active.id.replace('nav-',''); if(v==='enviados'||v==='todos') renderList(v); }
-  toast('✓ Marcado como assinado!');
+  const r = await fetch('/api/contratos/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'Assinado'})});
+  if((await r.json()).ok){
+    const c=contratos.find(x=>x.id===id); if(c) c.status='Assinado';
+    const active=document.querySelector('.nav-item.active');
+    if(active){ const v=active.id.replace('nav-',''); if(v==='enviados'||v==='todos') renderList(v); }
+    toast('✓ Marcado como assinado!');
+  }
 }
 
 // ── Reverter assinatura ───────────────────────────────────────────────────────
@@ -1384,10 +1414,13 @@ async function revertSigned(id) {
   const c = contratos.find(x=>x.id===id);
   if (!c) return;
   const novoStatus = c.enviado ? 'Enviado' : 'Gerado';
-  c.status = novoStatus; DB.saveContratos(contratos);
-  const active=document.querySelector('.nav-item.active');
-  if(active){ const v=active.id.replace('nav-',''); if(v==='enviados'||v==='todos') renderList(v); }
-  toast('↩ Status revertido para "'+novoStatus+'"');
+  const r = await fetch('/api/contratos/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:novoStatus})});
+  if((await r.json()).ok){
+    c.status = novoStatus;
+    const active=document.querySelector('.nav-item.active');
+    if(active){ const v=active.id.replace('nav-',''); if(v==='enviados'||v==='todos') renderList(v); }
+    toast('↩ Status revertido para "'+novoStatus+'"');
+  }
 }
 
 // ── Editar contrato ────────────────────────────────────────────────────────
@@ -1427,8 +1460,8 @@ function clearForm(){
 }
 
 function updateBadges(){
-  const be = $('badge-enviados'); if(be) be.textContent = contratos.filter(x=>x.enviado).length;
-  const bt = $('badge-todos');    if(bt) bt.textContent = contratos.length;
+  $('badge-enviados').textContent = contratos.filter(x=>x.enviado).length;
+  $('badge-todos').textContent    = contratos.length;
 }
 
 const tagClass = {Gerado:'tag-orange',Enviado:'tag-purple2',Assinado:'tag-green'};
@@ -1441,12 +1474,7 @@ function renderList(type){
   const box = $('list-'+type);
   if(!list.length){ box.innerHTML=`<div class="empty-state"><div class="empty-icon">${isEnv?'✉':'📋'}</div>${isEnv?'Nenhum contrato enviado ainda.':'Nenhum contrato gerado ainda.'}</div>`; return; }
 
-  box.innerHTML = list.map(c=>{
-    const sid = c.id; // string id seguro
-    const assinBtn = c.status!=='Assinado'
-      ? `<button class="btn btn-sm btn-green" data-action="sign" data-id="${sid}">Marcar assinado</button>`
-      : `<button class="btn btn-sm btn-red" data-action="revert" data-id="${sid}">↩ Reverter</button>`;
-    return `
+  box.innerHTML = list.map(c=>`
     <div class="crow">
       <div style="flex:1;min-width:0">
         <div class="crow-name">${c.razao}</div>
@@ -1454,34 +1482,27 @@ function renderList(type){
       </div>
       <div class="crow-actions">
         <span class="tag ${tagClass[c.status]||'tag-orange'}">${c.status}</span>
-        <button class="btn btn-sm" data-action="word" data-id="${sid}" title="Baixar Word" style="color:#2563EB;border-color:#BFDBFE;background:#EFF6FF;">
+        
+        <button class="btn btn-sm" onclick="downloadWord(${c.id})" title="Baixar Word" style="color: #2563EB; border-color: #BFDBFE; background: #EFF6FF;">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           Word
         </button>
-        <button class="btn btn-sm" data-action="pdf" data-id="${sid}" title="Baixar PDF">
+
+        <button class="btn btn-sm" onclick="downloadPdf(${c.id})" title="Baixar PDF">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           PDF
         </button>
-        <button class="btn btn-sm" data-action="edit" data-id="${sid}" title="Editar" style="color:#7C3AED;border-color:#DDD6FE;background:#F5F3FF;">
+        
+        <button class="btn btn-sm" onclick="editarContrato(${c.id})" title="Editar contrato" style="color:#7C3AED;border-color:#DDD6FE;background:#F5F3FF;">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Editar
         </button>
-        ${assinBtn}
+        ${c.status!=='Assinado'
+          ? `<button class="btn btn-sm btn-green" onclick="markSigned(${c.id})">Marcar assinado</button>`
+          : `<button class="btn btn-sm btn-red" onclick="revertSigned(${c.id})" title="Reverter status de assinado">↩ Reverter</button>`
+        }
       </div>
-    </div>`;
-  }).join('');
-  // Event delegation — evita problemas com IDs especiais em onclick
-  box.onclick = function(e) {
-    const btn = e.target.closest('[data-action]');
-    if (!btn) return;
-    const id = btn.dataset.id;
-    const action = btn.dataset.action;
-    if (action === 'pdf')    downloadPdf(id);
-    if (action === 'word')   downloadWord(id);
-    if (action === 'edit')   editarContrato(id);
-    if (action === 'sign')   markSigned(id);
-    if (action === 'revert') revertSigned(id);
-  };
+    </div>`).join('');
 }
 
 let toastTimer;
@@ -1493,33 +1514,23 @@ function loader(on, msg='Aguarde...'){
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-// ── LocalStorage API mock (sem backend) ──────────────────────────────────────
-const DB = {
-  getContratos(){ try{ return JSON.parse(localStorage.getItem('lotus_contratos')||'[]'); }catch(e){return[];} },
-  saveContratos(list){ localStorage.setItem('lotus_contratos', JSON.stringify(list)); },
-  getSmtp(){ try{ return JSON.parse(localStorage.getItem('lotus_smtp')||'{}'); }catch(e){return{};} },
-  saveSmtp(obj){ localStorage.setItem('lotus_smtp', JSON.stringify(obj)); },
-  newId(){ return 'c_'+Date.now()+'_'+Math.random().toString(36).slice(2,7); }
-};
-
 async function init(){
-  contratos = DB.getContratos();
-  updateBadges();
-  const s = DB.getSmtp();
-  if(s.host){ setVal('smtp-host',s.host); setVal('smtp-port',s.port||''); setVal('smtp-user',s.user||''); setVal('smtp-nome',s.nome||''); }
-
+  const r = await fetch('/api/contratos'); contratos=await r.json(); updateBadges();
+  const s = await (await fetch('/api/smtp')).json();
+  if(s.host){ setVal('smtp-host',s.host); setVal('smtp-port',s.port); setVal('smtp-user',s.user); setVal('smtp-nome',s.nome); }
+  
   // Converte a Logo em Base64 para garantir que ela apareça no Word
   try {
-    const logoRes = await fetch('logo.jpg');
+    const logoRes = await fetch('/logo.jpg');
     const logoBlob = await logoRes.blob();
     const reader = new FileReader();
-    reader.onloadend = () => {
-        window.logoBase64 = reader.result;
-        updatePreview();
+    reader.onloadend = () => { 
+        window.logoBase64 = reader.result; 
+        updatePreview(); 
     };
     reader.readAsDataURL(logoBlob);
-  } catch(e) {
-    console.log('Erro ao pré-carregar logo:', e);
+  } catch(e) { 
+    console.log('Erro ao pré-carregar logo:', e); 
   }
 }
 init().then(()=>updatePreview());

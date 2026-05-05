@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    
+    /* Lotus Green Primary */
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    
+    /* Destructive Red */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 142.1 76.2% 36.3%;
+    --radius: 0.75rem;
+
+    /* Urgency Colors */
+    --urgency-critical: 0 84.2% 60.2%;
+    --urgency-high: 24 95% 53%;
+    --urgency-medium: 45 93% 47%;
+    --urgency-low: 142.1 76.2% 36.3%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    
+    /* Lotus Green Primary Dark */
+    --primary: 142.1 70.6% 45.3%;
+    --primary-foreground: 144.9 80.4% 10%;
+    
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    
+    /* Destructive Red Dark */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 142.1 70.6% 45.3%;
+
+    /* Urgency Colors Dark Mode Adjustments */
+    --urgency-critical: 0 72% 51%;
+    --urgency-high: 24 90% 48%;
+    --urgency-medium: 45 85% 45%;
+    --urgency-low: 142.1 70.6% 45.3%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Geist', sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Typography Defaults */
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-balance font-semibold tracking-tight;
+  }
+  h1 {
+    @apply text-4xl md:text-5xl font-bold leading-tight;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    @apply text-2xl md:text-3xl leading-snug;
+  }
+  p {
+    @apply leading-relaxed max-w-[65ch];
+  }
+}
+
+@layer utilities {
+  .bg-urgency-critical { background-color: hsl(var(--urgency-critical)); }
+  .text-urgency-critical { color: hsl(var(--urgency-critical)); }
+  .border-urgency-critical { border-color: hsl(var(--urgency-critical)); }
+  
+  .bg-urgency-high { background-color: hsl(var(--urgency-high)); }
+  .text-urgency-high { color: hsl(var(--urgency-high)); }
+  .border-urgency-high { border-color: hsl(var(--urgency-high)); }
+  
+  .bg-urgency-medium { background-color: hsl(var(--urgency-medium)); }
+  .text-urgency-medium { color: hsl(var(--urgency-medium)); }
+  .border-urgency-medium { border-color: hsl(var(--urgency-medium)); }
+  
+  .bg-urgency-low { background-color: hsl(var(--urgency-low)); }
+  .text-urgency-low { color: hsl(var(--urgency-low)); }
+  .border-urgency-low { border-color: hsl(var(--urgency-low)); }
+
+  .wiki-search-input {
+    @apply h-[60px] rounded-xl shadow-sm text-lg px-12 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary focus-visible:shadow-md;
+  }
+
+  .wiki-card-hover {
+    @apply transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer;
+  }
+
+  .kanban-column-scroll {
+    @apply overflow-y-auto overflow-x-hidden;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  .kanban-column-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+  .kanban-column-scroll::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+  }
+}

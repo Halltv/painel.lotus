@@ -145,7 +145,7 @@
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="logo-area">
-      <img src="/logo.jpg" alt="Lotus TEF">
+      <img src="/Contratos/logo.jpg" alt="Lotus TEF">
       <div>
         <div class="logo-text">Lotus TEF</div>
         <div class="logo-sub">Gestão de Contratos</div>
@@ -433,7 +433,7 @@ function buildContractHTML(d, forPdf=false) {
   const endereco = partes || hl('[ENDEREÇO]');
   
   // Usa o base64 para garantir que a imagem vá para o PDF e Word
-  const logoSrc = window.logoBase64 || '/logo.jpg';
+  const logoSrc = window.logoBase64 || '/Contratos/logo.jpg';
   
   return `
     <div style="text-align: right; margin-bottom: 15px;"><img src="${logoSrc}" alt="Lotus TEF" style="height: 52px;"></div>
@@ -621,7 +621,7 @@ async function generatePdfBlob(d) {
 
   // Embed logo
   try {
-    const logoSrc = window.logoBase64 || '/logo.jpg';
+    const logoSrc = window.logoBase64 || '/Contratos/logo.jpg';
     pdf.addImage(logoSrc, 'JPEG', PW - MR - 40, MT, 40, 18, '', 'FAST');
   } catch(e) { console.warn('Logo PDF error:', e); }
 
@@ -1499,7 +1499,7 @@ async function init(){
   
   // Converte a Logo em Base64 para garantir que ela apareça no Word
   try {
-    const logoRes = await fetch('/logo.jpg');
+    const logoRes = await fetch('/Contratos/logo.jpg');
     const logoBlob = await logoRes.blob();
     const reader = new FileReader();
     reader.onloadend = () => { 

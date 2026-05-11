@@ -1285,34 +1285,20 @@ async function doGenerate() {
   // Modo edição: atualiza contrato existente
   if (window._editingId) {
     loader(true, 'Salvando edição...');
-    const r = await fetch('/api/contratos/'+window._editingId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    const d = await r.json();
-    loader(false);
-    if(d.ok){
-      const idx = contratos.findIndex(x => x.id === window._editingId);
-      if(idx >= 0) contratos[idx] = {...contratos[idx], ...body};
-      updateBadges();
-      toast('✓ Contrato atualizado!');
-      clearForm();
-      // Atualiza botão de volta para "Gerar contrato"
-      $('btn-gerar').textContent = 'Gerar contrato';
-    } else { toast('Erro ao salvar: '+d.msg, true); }
+    const idx=contratos.findIndex(x=>x.id===window._editingId);
+    if(idx>=0){contratos[idx]={...contratos[idx],...body};DB.saveContratos(contratos);}
+    loader(false); updateBadges();
+    toast('✓ Contrato atualizado!'); clearForm();
+    $('btn-gerar').textContent='Gerar contrato';
     return;
   }
 
   // Novo contrato
   loader(true, 'Salvando contrato...');
-  const r = await fetch('/api/contratos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const d = await r.json();
-  loader(false);
-  if(d.ok){
-    contratos.unshift(d.contrato);
-    updateBadges();
-    toast('✓ Contrato gerado e salvo!');
-    clearForm();
-  } else {
-    toast('Erro: '+d.msg, true);
-  }
+  const novo={...body,id:DB.newId(),dataGeracao:new Date().toLocaleDateString('pt-BR'),status:'Gerado',enviado:false};
+  contratos.unshift(novo); DB.saveContratos(contratos);
+  loader(false); updateBadges();
+  toast('✓ Contrato gerado e salvo!'); clearForm();
 }
 
 // ── Enviar email com PDF ──────────────────────────────────────────────────────
@@ -1326,9 +1312,8 @@ async function doSendEmail() {
 
   let c = contratos.find(x => x.razao === formData.razao && x.cnpj === formData.cnpj);
   if (!c) {
-    const r = await fetch('/api/contratos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(formData)});
-    const rd = await r.json();
-    if (rd.ok) { contratos.unshift(rd.contrato); c = rd.contrato; updateBadges(); }
+    c={...formData,id:DB.newId(),dataGeracao:new Date().toLocaleDateString('pt-BR'),status:'Gerado',enviado:false};
+    contratos.unshift(c); DB.saveContratos(contratos); updateBadges();
   }
   if (!c) { loader(false); toast('Erro ao salvar contrato.', true); return; }
 
@@ -1355,17 +1340,10 @@ async function doSendEmail() {
       pdfBase64: base64pdf,
       pdfNome: `Contrato_LotasTEF_${formData.razao.replace(/[^a-zA-Z0-9]/g,'_')}.pdf`
     };
-    const res = await fetch('/api/enviar-email', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const rd = await res.json();
     loader(false);
-    if(rd.ok){
-      c.status='Enviado'; c.enviado=true; c.emailDest=formData.email; c.dataEnvio=new Date().toLocaleDateString('pt-BR');
-      updateBadges();
-      toast('✉ PDF enviado para '+formData.email);
-      clearForm();
-    } else {
-      toast(rd.msg||'Erro ao enviar email.', true);
-    }
+    if(c){c.status='Enviado';c.enviado=true;c.emailDest=formData.email;c.dataEnvio=new Date().toLocaleDateString('pt-BR');DB.saveContratos(contratos);updateBadges();}
+    toast('⚠ Email sem backend. Contrato salvo localmente.');
+    clearForm();
   };
 }
 
@@ -1392,21 +1370,17 @@ async function downloadPdf(contratoId) {
 // ── Salvar SMTP ───────────────────────────────────────────────────────────────
 async function saveSmtp() {
   loader(true, 'Salvando...');
-  const r = await fetch('/api/smtp',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({host:val('smtp-host'),port:val('smtp-port'),user:val('smtp-user'),pass:$('smtp-pass').value,nome:val('smtp-nome')})});
+  DB.saveSmtp({host:val('smtp-host'),port:val('smtp-port'),user:val('smtp-user'),pass:$('smtp-pass').value,nome:val('smtp-nome')});
   loader(false);
-  if((await r.json()).ok) toast('✓ Configurações salvas!');
+  toast('✓ Configurações salvas localmente!');
 }
 
 // ── Marcar assinado ───────────────────────────────────────────────────────────
 async function markSigned(id) {
-  const r = await fetch('/api/contratos/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'Assinado'})});
-  if((await r.json()).ok){
-    const c=contratos.find(x=>x.id===id); if(c) c.status='Assinado';
-    const active=document.querySelector('.nav-item.active');
-    if(active){ const v=active.id.replace('nav-',''); if(v==='enviados'||v==='todos') renderList(v); }
-    toast('✓ Marcado como assinado!');
-  }
+  const c=contratos.find(x=>x.id===id); if(c){c.status='Assinado';DB.saveContratos(contratos);}
+  const active=document.querySelector('.nav-item.active');
+  if(active){const v=active.id.replace('nav-','');if(v==='enviados'||v==='todos')renderList(v);}
+  toast('✓ Marcado como assinado!');
 }
 
 // ── Reverter assinatura ───────────────────────────────────────────────────────
@@ -1414,13 +1388,10 @@ async function revertSigned(id) {
   const c = contratos.find(x=>x.id===id);
   if (!c) return;
   const novoStatus = c.enviado ? 'Enviado' : 'Gerado';
-  const r = await fetch('/api/contratos/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:novoStatus})});
-  if((await r.json()).ok){
-    c.status = novoStatus;
-    const active=document.querySelector('.nav-item.active');
-    if(active){ const v=active.id.replace('nav-',''); if(v==='enviados'||v==='todos') renderList(v); }
-    toast('↩ Status revertido para "'+novoStatus+'"');
-  }
+  c.status=novoStatus; DB.saveContratos(contratos);
+  const active=document.querySelector('.nav-item.active');
+  if(active){const v=active.id.replace('nav-','');if(v==='enviados'||v==='todos')renderList(v);}
+  toast('↩ Status revertido para "'+novoStatus+'"');
 }
 
 // ── Editar contrato ────────────────────────────────────────────────────────
@@ -1514,10 +1485,17 @@ function loader(on, msg='Aguarde...'){
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
+const DB={
+  getContratos(){try{return JSON.parse(localStorage.getItem('lotus_contratos')||'[]')}catch(e){return[]}},
+  saveContratos(l){localStorage.setItem('lotus_contratos',JSON.stringify(l))},
+  getSmtp(){try{return JSON.parse(localStorage.getItem('lotus_smtp')||'{}')}catch(e){return{}}},
+  saveSmtp(o){localStorage.setItem('lotus_smtp',JSON.stringify(o))},
+  newId(){return 'c_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)}
+};
 async function init(){
-  const r = await fetch('/api/contratos'); contratos=await r.json(); updateBadges();
-  const s = await (await fetch('/api/smtp')).json();
-  if(s.host){ setVal('smtp-host',s.host); setVal('smtp-port',s.port); setVal('smtp-user',s.user); setVal('smtp-nome',s.nome); }
+  contratos=DB.getContratos(); updateBadges();
+  const s=DB.getSmtp();
+  if(s.host){ setVal('smtp-host',s.host); setVal('smtp-port',s.port||''); setVal('smtp-user',s.user||''); setVal('smtp-nome',s.nome||''); }
   
   // Converte a Logo em Base64 para garantir que ela apareça no Word
   try {

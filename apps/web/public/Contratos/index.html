@@ -149,62 +149,53 @@
 <body>
 <div class="app">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="logo-area">
-      <img src="/Contratos/logo.jpg" alt="Lotus TEF">
-      <div>
-        <div class="logo-text">Lotus TEF</div>
-        <div class="logo-sub">Gestão de Contratos</div>
-      </div>
+  <!-- TOPBAR com navegação integrada -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <img class="topbar-logo" src="/Contratos/logo.jpg" alt="Lotus TEF">
+      <span class="topbar-title">Gestão de Contratos</span>
+      <nav style="display:flex;gap:2px;">
+        <div class="nav-item active" onclick="showView('novo')" id="nav-novo">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Novo contrato
+        </div>
+        <div class="nav-item" onclick="showView('enviados')" id="nav-enviados">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          Enviados
+          <span class="nav-badge" id="badge-enviados">0</span>
+        </div>
+        <div class="nav-item" onclick="showView('todos')" id="nav-todos">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Todos
+          <span class="nav-badge" id="badge-todos">0</span>
+        </div>
+        <div class="nav-item" onclick="showView('smtp')" id="nav-smtp">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+          Config. email
+        </div>
+      </nav>
     </div>
-    <nav class="nav">
-      <div class="nav-item active" onclick="showView('novo')" id="nav-novo">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Novo contrato
-      </div>
-      <div class="nav-item" onclick="showView('enviados')" id="nav-enviados">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-        Enviados
-        <span class="nav-badge" id="badge-enviados">0</span>
-      </div>
-      <div class="nav-item" onclick="showView('todos')" id="nav-todos">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        Todos os contratos
-        <span class="nav-badge" id="badge-todos">0</span>
-      </div>
-      <div class="nav-item" onclick="showView('smtp')" id="nav-smtp">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
-        Config. email
-      </div>
-    </nav>
+    <div class="topbar-actions" id="top-actions">
+      <button class="btn" onclick="clearForm()">Limpar</button>
+      <button class="btn" onclick="baixarWord()" style="color:#60a5fa;border-color:rgba(96,165,250,0.3);background:rgba(37,99,235,0.12);">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Baixar Word
+      </button>
+      <button class="btn btn-green" onclick="doSendEmail()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Enviar PDF por email
+      </button>
+      <button class="btn btn-purple" id="btn-gerar" onclick="doGenerate()">Gerar contrato</button>
+    </div>
   </div>
 
-  <!-- MAIN -->
-  <div class="main">
-    <div class="topbar">
-      <span class="topbar-title" id="view-title">Novo contrato</span>
-      <div class="topbar-actions" id="top-actions">
-        <button class="btn" onclick="clearForm()">Limpar</button>
-        <button class="btn" onclick="baixarWord()" style="color:#2563EB;border-color:#BFDBFE;background:#EFF6FF;">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          Baixar Word
-        </button>
-        <button class="btn btn-green" onclick="doSendEmail()">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-          Enviar PDF por email
-        </button>
-        <button class="btn btn-purple" id="btn-gerar" onclick="doGenerate()">Gerar contrato</button>
-      </div>
-    </div>
-
-    <div class="content">
+  <div class="content" style="flex:1;overflow:hidden;">
 
       <!-- ── NOVO CONTRATO ── -->
-      <div id="view-novo" class="panels">
+      <div id="view-novo" class="panels" style="height:100%;">
 
         <!-- Formulário -->
-        <div class="panel">
+        <div class="panel-form">
           <div class="panel-hd">
             <span class="panel-title">Dados do contratante</span>
             <span class="pill pill-gray">Cliente</span>
@@ -288,15 +279,17 @@
           </div>
         </div>
 
-        <!-- Preview do contrato COMPLETO -->
-        <div class="panel">
+        <!-- Preview do contrato COMPLETO (white paper) -->
+        <div class="panel-preview">
           <div class="panel-hd">
-            <span class="panel-title">Preview do contrato</span>
+            <span class="panel-title" style="color:#1e293b;">Preview do contrato</span>
             <span class="pill pill-live">Ao vivo</span>
           </div>
-          <div class="scroll-body">
-            <div class="contract-wrap" id="contract-body">
-              <!-- gerado pelo JS -->
+          <div class="scroll-body" style="flex:1;overflow-y:auto;">
+            <div class="contract-paper">
+              <div class="contract-wrap" id="contract-body">
+                <!-- gerado pelo JS -->
+              </div>
             </div>
           </div>
         </div>
@@ -304,8 +297,8 @@
       </div><!-- /panels -->
 
       <!-- ENVIADOS -->
-      <div id="view-enviados" style="display:none" class="view-page">
-        <div class="panel">
+      <div id="view-enviados" style="display:none;height:100%;overflow-y:auto;padding:16px 18px;">
+        <div class="list-panel">
           <div class="panel-hd">
             <span class="panel-title">Contratos enviados</span>
             <span class="pill pill-gray" id="count-env">0 contratos</span>
@@ -315,8 +308,8 @@
       </div>
 
       <!-- TODOS -->
-      <div id="view-todos" style="display:none" class="view-page">
-        <div class="panel">
+      <div id="view-todos" style="display:none;height:100%;overflow-y:auto;padding:16px 18px;">
+        <div class="list-panel">
           <div class="panel-hd">
             <span class="panel-title">Todos os contratos</span>
             <span class="pill pill-gray" id="count-todos">0 contratos</span>
@@ -326,8 +319,8 @@
       </div>
 
       <!-- SMTP -->
-      <div id="view-smtp" style="display:none" class="smtp-wrap">
-        <div class="panel">
+      <div id="view-smtp" style="display:none;height:100%;overflow-y:auto;padding:16px 18px;">
+        <div class="list-panel" style="max-width:500px;">
           <div class="panel-hd"><span class="panel-title">Configuração de email (SMTP)</span></div>
           <div class="panel-body">
             <div class="slabel">Servidor</div>
@@ -356,7 +349,6 @@ Equipe Lotus TEF</textarea>
       </div>
 
     </div><!-- /content -->
-  </div><!-- /main -->
 </div><!-- /app -->
 
 <!-- PDF invisible template -->
@@ -1276,7 +1268,7 @@ function showView(v) {
     const el=$('view-'+x); if(el) el.style.display='none';
     const n=$('nav-'+x);   if(n)  n.classList.remove('active');
   });
-  const t=$('view-'+v); if(t) t.style.display = v==='novo'?'grid':'block';
+  const t=$('view-'+v); if(t) { t.style.display = v==='novo'?'grid':'block'; if(v==='novo') t.style.height='100%'; }
   $('nav-'+v).classList.add('active');
   $('view-title').textContent = {novo:'Novo contrato',enviados:'Contratos enviados',todos:'Todos os contratos',smtp:'Configuração de email'}[v];
   $('top-actions').style.display = v==='novo'?'flex':'none';

@@ -9,43 +9,18 @@ const sql = postgres(databaseUrl);
 async function migrate() {
   logger.info('Running database migrations...');
 
-  await sql`
-    DO $$ BEGIN
-      CREATE TYPE user_role AS ENUM ('ADMIN', 'GERENTE', 'OPERADOR');
-    EXCEPTION WHEN duplicate_object THEN null; END $$;
+  // Enums — cada um separado
+  await sql`DO $$ BEGIN CREATE TYPE user_role AS ENUM ('ADMIN', 'GERENTE', 'OPERADOR'); EXCEPTION WHEN duplicate_object THEN null; END $$`;
+  await sql`DO $$ BEGIN CREATE TYPE client_status AS ENUM ('ativo', 'implantacao', 'bloqueado', 'inativo'); EXCEPTION WHEN duplicate_object THEN null; END $$`;
+  await sql`DO $$ BEGIN CREATE TYPE tipo_tef AS ENUM ('tef_integrado', 'tef_maquininha_wireless', 'automacao_pdv'); EXCEPTION WHEN duplicate_object THEN null; END $$`;
+  await sql`DO $$ BEGIN CREATE TYPE ticket_status AS ENUM ('A Fazer', 'Em Andamento', 'Pendente Cliente', 'Concluído'); EXCEPTION WHEN duplicate_object THEN null; END $$`;
+  await sql`DO $$ BEGIN CREATE TYPE ticket_urgencia AS ENUM ('Crítica', 'Alta', 'Média', 'Baixa'); EXCEPTION WHEN duplicate_object THEN null; END $$`;
+  await sql`DO $$ BEGIN CREATE TYPE ticket_categoria AS ENUM ('Suporte', 'Implantação', 'Comercial', 'Cobrança'); EXCEPTION WHEN duplicate_object THEN null; END $$`;
+  await sql`DO $$ BEGIN CREATE TYPE whatsapp_status AS ENUM ('connected', 'connecting', 'disconnected'); EXCEPTION WHEN duplicate_object THEN null; END $$`;
+  await sql`DO $$ BEGIN CREATE TYPE conversation_status AS ENUM ('active', 'closed', 'transferred'); EXCEPTION WHEN duplicate_object THEN null; END $$`;
+  await sql`DO $$ BEGIN CREATE TYPE lead_status AS ENUM ('new', 'contacted', 'qualified', 'converted'); EXCEPTION WHEN duplicate_object THEN null; END $$`;
 
-    DO $$ BEGIN
-      CREATE TYPE client_status AS ENUM ('ativo', 'implantacao', 'bloqueado', 'inativo');
-    EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-    DO $$ BEGIN
-      CREATE TYPE tipo_tef AS ENUM ('tef_integrado', 'tef_maquininha_wireless', 'automacao_pdv');
-    EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-    DO $$ BEGIN
-      CREATE TYPE ticket_status AS ENUM ('A Fazer', 'Em Andamento', 'Pendente Cliente', 'Concluído');
-    EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-    DO $$ BEGIN
-      CREATE TYPE ticket_urgencia AS ENUM ('Crítica', 'Alta', 'Média', 'Baixa');
-    EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-    DO $$ BEGIN
-      CREATE TYPE ticket_categoria AS ENUM ('Suporte', 'Implantação', 'Comercial', 'Cobrança');
-    EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-    DO $$ BEGIN
-      CREATE TYPE whatsapp_status AS ENUM ('connected', 'connecting', 'disconnected');
-    EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-    DO $$ BEGIN
-      CREATE TYPE conversation_status AS ENUM ('active', 'closed', 'transferred');
-    EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-    DO $$ BEGIN
-      CREATE TYPE lead_status AS ENUM ('new', 'contacted', 'qualified', 'converted');
-    EXCEPTION WHEN duplicate_object THEN null; END $$;
-  `;
+  logger.info('Enums OK');
 
   await sql`
     CREATE TABLE IF NOT EXISTS users (
@@ -187,11 +162,24 @@ async function migrate() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS legacy_contratos (
+      id BIGINT PRIMARY KEY,
+      razao TEXT, cnpj VARCHAR(30), valor NUMERIC(10,2),
+      rua TEXT, numero TEXT, complemento TEXT, bairro TEXT,
+      cep TEXT, cidade TEXT, uf VARCHAR(5), email TEXT,
+      data TEXT, testemunha TEXT, cpf_test TEXT,
+      status TEXT DEFAULT 'Gerado', enviado BOOLEAN DEFAULT false,
+      email_dest TEXT, data_envio TEXT, data_criacao TEXT,
+      imported_at TIMESTAMP DEFAULT NOW()
+    )
+  `;
+
   logger.info('Migrations complete!');
   await sql.end();
 }
 
 migrate().catch(err => {
-  console.error('Migration failed:', err);
+  console.error('Migration failed:', err.message);
   process.exit(1);
 });

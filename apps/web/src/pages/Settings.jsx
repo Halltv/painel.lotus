@@ -16,7 +16,103 @@ import { useAuth } from '@/contexts/AuthContext.jsx';
 import { useUsers } from '@/hooks/useUsers.js';
 import { useWhatsAppInstances } from '@/hooks/useWhatsApp.js';
 import { toast } from 'sonner';
-import { Plus, Trash2, Wifi, WifiOff, RefreshCw, User, Shield, Smartphone } from 'lucide-react';
+import { Plus, Trash2, Wifi, WifiOff, RefreshCw, User, Shield, Smartphone, HardDrive, Loader2 as Loader2Icon } from 'lucide-react';
+
+
+// ─── Mega Tab ─────────────────────────────────────────────────────────────────
+const MEGA_KEY = 'lotus_mega_config';
+
+function MegaTab() {
+  const [email, setEmail]       = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [showPass, setShowPass] = React.useState(false);
+  const [saving, setSaving]     = React.useState(false);
+  const [saved, setSaved]       = React.useState(false);
+
+  React.useEffect(() => {
+    try {
+      const cfg = JSON.parse(localStorage.getItem(MEGA_KEY) || '{}');
+      if (cfg.email)    setEmail(cfg.email);
+      if (cfg.password) setPassword(cfg.password);
+      if (cfg.email)    setSaved(true);
+    } catch {}
+  }, []);
+
+  const handleSave = () => {
+    if (!email.trim()) { toast.error('Informe o e-mail da conta MEGA.'); return; }
+    setSaving(true);
+    setTimeout(() => {
+      localStorage.setItem(MEGA_KEY, JSON.stringify({ email: email.trim(), password }));
+      setSaved(true);
+      setSaving(false);
+      toast.success('Credenciais MEGA salvas!');
+    }, 600);
+  };
+
+  const handleClear = () => {
+    localStorage.removeItem(MEGA_KEY);
+    setEmail(''); setPassword(''); setSaved(false);
+    toast.success('Credenciais removidas.');
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <HardDrive className="h-5 w-5 text-primary" /> MEGA – Armazenamento
+        </CardTitle>
+        <CardDescription>
+          Configure sua conta MEGA para hospedar os arquivos da seção <strong>Lotus APP</strong>.
+          Faça upload no MEGA, copie o link compartilhável e cole ao adicionar arquivos no painel.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5 max-w-md">
+        <div className="rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground space-y-2">
+          <p className="font-medium text-foreground">Como funciona</p>
+          <p>1. Faça login em <a href="https://mega.nz" target="_blank" rel="noreferrer" className="text-primary underline">mega.nz</a></p>
+          <p>2. Faça upload do arquivo desejado</p>
+          <p>3. Clique com o botão direito → Obter link → Copie</p>
+          <p>4. Cole o link ao adicionar um novo arquivo no painel</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="mega-email">E-mail da conta MEGA</Label>
+          <Input id="mega-email" type="email" placeholder="seuemail@exemplo.com"
+            value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="mega-pass">Senha (salva localmente no navegador)</Label>
+          <div className="relative">
+            <Input id="mega-pass" type={showPass ? 'text' : 'password'} placeholder="••••••••"
+              value={password} onChange={(e) => setPassword(e.target.value)} className="pr-10" />
+            <button type="button" onClick={() => setShowPass(v => !v)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              {showPass
+                ? <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              }
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground">As credenciais ficam apenas no seu navegador, não são enviadas para nossos servidores.</p>
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <Button onClick={handleSave} disabled={saving} className="gap-2">
+            {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> Salvando...</> : <><HardDrive className="h-4 w-4" /> Salvar</>}
+          </Button>
+          {saved && <Button variant="outline" onClick={handleClear}>Remover credenciais</Button>}
+        </div>
+
+        {saved && (
+          <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 rounded-lg px-3 py-2 border border-green-200 dark:border-green-900">
+            <Wifi className="h-4 w-4" /> Conta configurada: <strong>{email}</strong>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 // ─── Profile Tab ──────────────────────────────────────────────────────────────
 function ProfileTab() {
@@ -379,6 +475,9 @@ export default function Settings() {
           <TabsTrigger value="whatsapp" className="flex items-center gap-2">
             <Smartphone className="h-4 w-4" /> WhatsApp
           </TabsTrigger>
+          <TabsTrigger value="mega" className="flex items-center gap-2">
+            <HardDrive className="h-4 w-4" /> MEGA
+          </TabsTrigger>
           {/* Aba Administração: SOMENTE ADMIN */}
           {isAdmin && (
             <TabsTrigger value="admin" className="flex items-center gap-2">
@@ -390,6 +489,7 @@ export default function Settings() {
 
         <TabsContent value="perfil"><ProfileTab /></TabsContent>
         <TabsContent value="whatsapp"><WhatsAppTab /></TabsContent>
+        <TabsContent value="mega"><MegaTab /></TabsContent>
         {isAdmin && <TabsContent value="admin"><AdminTab /></TabsContent>}
       </Tabs>
     </motion.div>

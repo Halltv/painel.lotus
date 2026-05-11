@@ -1454,23 +1454,23 @@ function renderList(type){
       <div class="crow-actions">
         <span class="tag ${tagClass[c.status]||'tag-orange'}">${c.status}</span>
         
-        <button class="btn btn-sm" onclick="downloadWord(${c.id})" title="Baixar Word" style="color: #2563EB; border-color: #BFDBFE; background: #EFF6FF;">
+        <button class="btn btn-sm" onclick="downloadWord('${c.id}')" title="Baixar Word" style="color: #2563EB; border-color: #BFDBFE; background: #EFF6FF;">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           Word
         </button>
 
-        <button class="btn btn-sm" onclick="downloadPdf(${c.id})" title="Baixar PDF">
+        <button class="btn btn-sm" onclick="downloadPdf('${c.id}')" title="Baixar PDF">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           PDF
         </button>
         
-        <button class="btn btn-sm" onclick="editarContrato(${c.id})" title="Editar contrato" style="color:#7C3AED;border-color:#DDD6FE;background:#F5F3FF;">
+        <button class="btn btn-sm" onclick="editarContrato('${c.id}')" title="Editar contrato" style="color:#7C3AED;border-color:#DDD6FE;background:#F5F3FF;">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Editar
         </button>
         ${c.status!=='Assinado'
-          ? `<button class="btn btn-sm btn-green" onclick="markSigned(${c.id})">Marcar assinado</button>`
-          : `<button class="btn btn-sm btn-red" onclick="revertSigned(${c.id})" title="Reverter status de assinado">↩ Reverter</button>`
+          ? `<button class="btn btn-sm btn-green" onclick="markSigned('${c.id}')">Marcar assinado</button>`
+          : `<button class="btn btn-sm btn-red" onclick="revertSigned('${c.id}')" title="Reverter status de assinado">↩ Reverter</button>`
         }
       </div>
     </div>`).join('');
@@ -1512,6 +1512,19 @@ async function init(){
   }
 }
 init().then(()=>updatePreview());
+
+// Expor funções globalmente para funcionar dentro do React (onclick no innerHTML)
+window.downloadWord = downloadWord;
+window.downloadPdf = downloadPdf;
+window.editarContrato = editarContrato;
+window.markSigned = markSigned;
+window.revertSigned = revertSigned;
+window.baixarWord = baixarWord;
+window.showTab = showTab;
+window.doGenerate = doGenerate;
+window.doSendEmail = doSendEmail;
+window.salvarSmtp = salvarSmtp;
+window.buscarCNPJ = buscarCNPJ;
 </script>
 </body>
 </html>
